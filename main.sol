@@ -17,18 +17,18 @@ contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
     mapping(uint256 => uint256) public lastClaimTimestamps;
     
     uint256[] multiplierFrmIds;
-    uint256[] multiplierAmounts;
+    uint256[] multiplierAmountsHundreths;
     uint256 distributionRate = 1;
-    uint256 startBlockTimestamp = 1000000;
+    uint256 startBlockTimestamp = 1646205522; //This is when the mainnet contract was deployed
 
     function resetMultipliers() public onlyOwner {
         delete multiplierFrmIds;
-        delete multiplierAmounts;
+        delete multiplierAmountsHundreths;
     }
 
-    function addMultiplier(uint256 _frmId, uint256 _multiplierAmount) public onlyOwner {
+    function addMultiplier(uint256 _frmId, uint256 _multiplierAmountHundreths) public onlyOwner {
         multiplierFrmIds.push(_frmId);
-        multiplierAmounts.push(_multiplierAmount);
+        multiplierAmountsHundreths.push(_multiplierAmountHundreths);
     }
 
     function setVizmeshSmartContractAddress(address _vizmeshSmartContractAddress) public onlyOwner {
@@ -39,17 +39,18 @@ contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
         uint256 multiplier = 0;
         for(uint256 i=0;i<multiplierFrmIds.length;i++ ) {
             if(_frmId <= multiplierFrmIds[i]) {
-                multiplier += multiplierAmounts[i];
+                multiplier += multiplierAmountsHundreths[i];
             }
         }
         return multiplier;
     }
 
-    function getClaimable(uint256 frmId) private returns(uint256){
-        if(lastClaimTimestamps[frmId] == 0) {
-            lastClaimTimestamps[frmId] = startBlockTimestamp;
+    function getClaimable(uint256 frmId) public view returns(uint256){
+        uint256 lastClaimTimestamp = lastClaimTimestamps[frmId];
+        if(lastClaimTimestamp == 0) {
+            lastClaimTimestamp = startBlockTimestamp;
         }
-        uint256 elapsed = block.timestamp - lastClaimTimestamps[frmId];
+        uint256 elapsed = block.timestamp - lastClaimTimestamp;
         if (elapsed < 0) {return 0;}
         return elapsed / uint256(86400); //This returns an integer
     }

@@ -1,4 +1,7 @@
 // SPDX-License-Identifier: MIT
+// RINKEBY VIZMESH: 0x67555c802D8E319534c5532f8867625fa1756601
+// RINKEBY DCT: 0x4651eEB675DBa4eaCa41bDBF45b1859ff0132C0b
+
 
 pragma solidity ^0.8.4;
 
@@ -73,7 +76,7 @@ contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
     }
 
     constructor() ERC20("DecentralizedCurationToken", "DCT") {
-        vizmeshSmartContractAddress = 0xb7FDe9c440793E5a45e0b3C0B373870Ab79Df477;
+        vizmeshSmartContractAddress = 0x67555c802D8E319534c5532f8867625fa1756601;
     }
 
     function mint(address to, uint256 amount) private {

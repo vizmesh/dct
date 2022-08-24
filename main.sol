@@ -12,23 +12,25 @@ interface Vizmesh {
 
 contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
     uint256 converter = 1000000000000000000;
+
     uint256 supplyCap = 21000000 * converter;
     uint256 supplyMinted = 0;
+
     address public vizmeshSmartContractAddress;
+    uint256 startBlockTimestamp = 1646205522; //This is when the ERC1155 mainnet contract was deployed
     mapping(uint256 => uint256) public lastClaimTimestamps;
-    
 
+    uint8 distributionRateHundreths = 100; //100 = 100x hundreths in one day One token per day
     uint256[] multiplierFrmIds;
-    uint256[] multiplierAmountsHundreths;
-    uint256 distributionRate = 1;
-    uint256 startBlockTimestamp = 1646205522; //This is when the mainnet contract was deployed
-
+    uint8[] multiplierAmountsHundreths;
+    
+    //only owner functions
     function resetMultipliers() public onlyOwner {
         delete multiplierFrmIds;
         delete multiplierAmountsHundreths;
     }
 
-    function addMultiplier(uint256 _frmId, uint256 _multiplierAmountHundreths) public onlyOwner {
+    function addMultiplier(uint256 _frmId, uint8 _multiplierAmountHundreths) public onlyOwner {
         multiplierFrmIds.push(_frmId);
         multiplierAmountsHundreths.push(_multiplierAmountHundreths);
     }
@@ -37,11 +39,16 @@ contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
         vizmeshSmartContractAddress = _vizmeshSmartContractAddress;
     }
 
+    function setDistributionRateHundreths(uint8 _distributionRateHundreths) public onlyOwner {
+        distributionRateHundreths = _distributionRateHundreths;
+    }
+
+    //public functions
     function getMultiplier(uint256 _frmId) public view returns(uint256) {
-        uint256 multiplier = distributionRate * converter;
+        uint256 multiplier = distributionRateHundreths * converter / 100;
         for(uint256 i=0;i<multiplierFrmIds.length;i++ ) {
             if(_frmId <= multiplierFrmIds[i]) {
-                multiplier += multiplierAmountsHundreths[i] * converter;
+                multiplier += multiplierAmountsHundreths[i] * converter / 100;
             }
         }
         return multiplier;

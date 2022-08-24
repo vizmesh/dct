@@ -1,7 +1,4 @@
 // SPDX-License-Identifier: MIT
-// RINKEBY VIZMESH: 0x67555c802D8E319534c5532f8867625fa1756601
-// RINKEBY DCT: 0x4651eEB675DBa4eaCa41bDBF45b1859ff0132C0b
-
 
 pragma solidity ^0.8.4;
 
@@ -14,11 +11,13 @@ interface Vizmesh {
 }
 
 contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
-    uint256 supplyCap = 21000000;
+    uint256 converter = 1000000000000000000;
+    uint256 supplyCap = 21000000 * converter;
     uint256 supplyMinted = 0;
     address public vizmeshSmartContractAddress;
     mapping(uint256 => uint256) public lastClaimTimestamps;
     
+
     uint256[] multiplierFrmIds;
     uint256[] multiplierAmountsHundreths;
     uint256 distributionRate = 1;
@@ -39,10 +38,10 @@ contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
     }
 
     function getMultiplier(uint256 _frmId) public view returns(uint256) {
-        uint256 multiplier = 0;
+        uint256 multiplier = distributionRate * converter;
         for(uint256 i=0;i<multiplierFrmIds.length;i++ ) {
             if(_frmId <= multiplierFrmIds[i]) {
-                multiplier += multiplierAmountsHundreths[i];
+                multiplier += multiplierAmountsHundreths[i] * converter;
             }
         }
         return multiplier;
@@ -55,7 +54,8 @@ contract DecentralizedCurationToken is ERC20, ERC20Burnable, Ownable {
         }
         uint256 elapsed = block.timestamp - lastClaimTimestamp;
         if (elapsed < 0) {return 0;}
-        return elapsed / uint256(86400); //This returns an integer
+        uint256 multiplier = getMultiplier(frmId);
+        return multiplier * elapsed / uint256(86400); //This returns an integer
     }
 
     function claimTokens(uint256 frmId) public {
